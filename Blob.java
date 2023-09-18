@@ -1,16 +1,13 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-import static java.nio.file.StandardCopyOption.*;
+//import static java.nio.file.StandardCopyOption.*;
 
 public class Blob {
     private String translatedToSHA1;
@@ -42,12 +39,24 @@ public class Blob {
     }
     
     public void writeFile () throws IOException {
-        String fileName = translatedToSHA1;
-        File file = new File(fileName);
+        
+        //girl idk what kind of errors ur code was throwing, so i rewrote the 'create objects folder' stuff
+        //it works the same way as the old way (i think), but should run on all computers now.
+        File dir = new File ("objects");
+        dir.mkdirs();
+        File file = new File ("objects/" + getShaString()); //file = file you write to
+        file.createNewFile();
+
         PrintWriter pw = new PrintWriter (file);
         pw.print(fileContents);
         pw.close();
-        Files.move(Paths.get("/Users/natalielim/Library/CloudStorage/OneDrive-Harvard-WestlakeSchool/h topics/Prerequisites-Blob-and-Index/" + fileName),
-           (Paths.get("/Users/natalielim/Library/CloudStorage/OneDrive-Harvard-WestlakeSchool/h topics/Prerequisites-Blob-and-Index/objects/" + fileName)) );
-    }    
+        // Files.move(Paths.get("/Users/zhang/Desktop/HonorsTopics/Blob-And-Index-NatalieSophia/" + fileName),
+        //    (Paths.get("/Users/zhang/Desktop/HonorsTopics/Blob-And-Index-NatalieSophia/objects/" + fileName)));
+
+    }  
+    
+    public String getFileContents ()
+    {
+        return fileContents;
+    }
 }

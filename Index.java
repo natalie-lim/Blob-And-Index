@@ -2,19 +2,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import java.nio.file.Files;
 
 public class Index {
     private static HashMap<String, Blob> blobs;
     public Index () {
     }
     //initializes a project by creating an index file and a n obj folder
-    public static void init() throws IOException {
+    public void init() throws IOException {
         blobs = new HashMap<String, Blob>();
         //creating the objects
         File theDir = new File("objects");
@@ -33,7 +30,7 @@ public class Index {
     }
     
     public static void removeBlob (String fileName) throws IOException, NoSuchAlgorithmException {
-        String SHAstring = blobs.get(fileName).getShaString();
+        //String SHAstring = blobs.get(fileName).getShaString();
         blobs.remove(fileName);
         writeHashMap();
     }

@@ -1,0 +1,90 @@
+[
+    {
+        "className": "Blob",
+        "constructorConfigs": [
+            {
+                "parameterTypes": ["String"],
+                "values": ["fileOnDisk"]
+            }
+        ],
+        "methodConfigs": [
+            {
+                "methodName": "translateToSha1",
+                "parameters": [],
+                "values": []
+            },
+            {
+                "methodName": "getSha1",
+                "parameters": [
+                ],
+                "values": [
+                    
+                ]
+            },
+            {
+                "methodName": "writeFile",
+                "parameters": [
+                ],
+                "values": [
+                    
+                ]
+            }
+        ]
+    },
+    {
+        "className": "Blob",
+        "constructorConfigs": [
+            {
+                "parameterTypes": [
+                    "String"
+                ],
+                "values": [
+                    "__TEST_FILE_NAME__"
+                ]
+            }
+        ],
+        "methodConfigs": [
+            {
+                "methodName": "getSha1",
+                "parameters": [],
+                "values": []
+            }
+        ]
+    },
+    {
+        "classname" : "Index",
+        "constructorConfigs": [
+            {
+                "parameterTypes": [],
+                "values": []
+            }
+        ],
+        "methodConfigs": [
+            {
+                "methodName" : "init",
+                "parameterTypes": [],
+                "values": []
+            },
+            {
+                "methodName" : "addBlob",
+                "parameterTypes": ["String"],
+                "values": ["fileName"]
+            },
+            {
+                "methodName" : "removeBlob",
+                "parameterTypes": ["String"],
+                "values": ["fileName"]
+            },
+            {
+                "methodName" : "printMap",
+                "parameterTypes": [],
+                "values": []
+            },
+            {
+                "methodName" : "writeHashMap",
+                "parameterTypes": [],
+                "values": []
+            }
+        ]
+    }
+]
