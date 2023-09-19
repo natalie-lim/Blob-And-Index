@@ -11,10 +11,12 @@ import java.math.BigInteger;
 
 public class Blob {
     private String translatedToSHA1;
-    private String fileContents;
+    private static String fileContents;
+    private String ogName; //original fileName
     
     public Blob (String fileOnDisk) throws IOException, NoSuchAlgorithmException {
-        this.fileContents = "";
+        ogName = fileOnDisk;
+        Blob.fileContents = "";
         BufferedReader br = new BufferedReader(new FileReader(fileOnDisk));
         while (br.ready()) {
             fileContents += (char) (br.read());
@@ -22,6 +24,11 @@ public class Blob {
         br.close();
         translateToSha1();
         writeFile();
+    }
+
+    public String getOgName ()
+    {
+        return ogName;
     }
     
     public void translateToSha1 () throws NoSuchAlgorithmException {
@@ -46,6 +53,8 @@ public class Blob {
         dir.mkdirs();
         File file = new File ("objects/" + getShaString()); //file = file you write to
         file.createNewFile();
+        File indexFile = new File("index");
+        indexFile.createNewFile();
 
         PrintWriter pw = new PrintWriter (file);
         pw.print(fileContents);

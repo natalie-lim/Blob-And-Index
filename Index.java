@@ -29,13 +29,13 @@ public class Index {
         writeHashMap();
     }
     
-    public static void removeBlob (String fileName) throws IOException, NoSuchAlgorithmException {
+    public void removeBlob (String fileName) throws IOException, NoSuchAlgorithmException {
         //String SHAstring = blobs.get(fileName).getShaString();
         blobs.remove(fileName);
         writeHashMap();
     }
     
-    public static void printMap () {
+    public void printMap () {
         for (Entry<String, Blob> mapElement: blobs.entrySet()) {
             String key = mapElement.getKey();
             String SHA1 = mapElement.getValue().getShaString();
