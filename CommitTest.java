@@ -27,17 +27,25 @@ public class CommitTest {
     }
 
     @Test
-    void testGetContents() {
-
+    void testGetContents() throws Exception {
+        Commit commit = new Commit("Author", "summary");
+        File file = new File("example1");
+        String treeSha = "a67a4e6190d11dea06fbd38affc52dcc33cc4564";
+        String date = Utils.getDate();
+        String content = treeSha + "\n" + "" + "\n" + "\n" + "Author" + "\n" + date + "\n" + "summary";
+        assertEquals("Get contents doesn't work", commit.getContents(),
+                content);
     }
 
     @Test
-    void testGetDate() {
-
+    void testGetDate() throws Exception {
+        Commit commit = new Commit("Author", "summary");
+        assertEquals("date doesn't work", Utils.getDate(), commit.getDate());
     }
 
     @Test
-    void testGetSHA() {
-
+    void testGetSHA() throws Exception {
+        Commit commit = new Commit("Author", "summary");
+        assertEquals("get sha doesn't work", Utils.getSHA("testing"), commit.getSHA("testing"));
     }
 }
