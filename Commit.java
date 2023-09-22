@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Formatter;
 
@@ -31,7 +34,7 @@ public class Commit {
         this.summary = summary;
         this.date = getDate();
 
-        SHA1NextCommit = null;
+        SHA1NextCommit = "";
         fileContents = getContents();
         SHA1FileContents = getSHA(fileContents);
 
@@ -41,12 +44,19 @@ public class Commit {
     }
 
     public Commit(String author, String summary) throws Exception {
-        this(null, author, summary);
+        this("", author, summary);
     }
 
     public String getDate() {
+        // Date date = new Date();
+        // return date.toString();
         Date date = new Date();
-        return date.toString();
+        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        int year = localDate.getYear();
+        int month = localDate.getMonthValue();
+        String monthName = Month.of(month).name();
+        int day = localDate.getDayOfMonth();
+        return (monthName + " " + day + ", " + year);
     }
 
     public String getContents() {

@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
@@ -7,6 +8,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 public class Tree {
+
+    public static void main(String[] args) throws Exception {
+        Commit commit = new Commit("hello", "summary");
+    }
+
     ArrayList<String> t; // list of all the entries of the tree
 
     public Tree() {
@@ -103,7 +109,9 @@ public class Tree {
         }
 
         File file = new File("objects/" + sha1); // file = file you write to
-        file.createNewFile();
+        if (!file.exists()) {
+            file.createNewFile();
+        }
 
         PrintWriter pw = new PrintWriter(file);
         for (int i = 0; i < t.size(); i++) {
