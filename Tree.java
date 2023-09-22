@@ -2,10 +2,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Formatter;
 
 public class Tree {
 
@@ -17,6 +19,54 @@ public class Tree {
 
     public Tree() {
         t = new ArrayList<String>();
+    }
+
+    public String addDirectory(String directoryPath) throws Exception {
+        File dir = new File (directoryPath);
+        dir.mkdirs();
+        if (!dir.exists()) {
+            throw new Exception("Directory path does not exist.");
+        }
+        File[] directoryListing = dir.listFiles();
+        if (directoryListing != null) {
+            for (File child : directoryListing) {
+                if (child.isFile()) {
+                    Blob blob = new Blob(child.getName());
+                    String shaOfFile = blob.getShaString();
+                    add("blob: " + shaOfFile + ": " + child.getName());
+                } else {
+                    Tree childTree = new Tree();
+                    childTree.addDirectory(directoryPath + "/" + childTree.getSHA1());
+                }
+            }
+        }
+        return getSHA1();
+    }
+
+    public static String convertToSha1(String fileContents) {
+        String sha1 = "";
+        try {
+            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+            crypt.reset();
+            crypt.update(fileContents.getBytes("UTF-8"));
+            sha1 = byteToHex(crypt.digest());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return sha1;
+    }
+
+    // Used for sha1
+    private static String byteToHex(final byte[] hash) {
+        Formatter formatter = new Formatter();
+        for (byte b : hash) {
+            formatter.format("%02x", b);
+        }
+        String result = formatter.toString();
+        formatter.close();
+        return result;
     }
 
     // gets the sha part out of a tree entry
@@ -121,7 +171,11 @@ public class Tree {
     }
 
     public String getSHA1() {
-        return "a67a4e6190d11dea06fbd38affc52dcc33cc4564";
+        String toSha = "";
+        for (String str : t) {
+            toSha += str + "\n";
+        }
+        return convertToSha1(toSha);
 
     }
 
