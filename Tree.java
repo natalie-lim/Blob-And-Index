@@ -46,32 +46,6 @@ public class Tree {
         return getSHA1();
     }
 
-    public static String convertToSha1(String fileContents) {
-        String sha1 = "";
-        try {
-            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
-            crypt.reset();
-            crypt.update(fileContents.getBytes("UTF-8"));
-            sha1 = byteToHex(crypt.digest());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return sha1;
-    }
-
-    // Used for sha1
-    private static String byteToHex(final byte[] hash) {
-        Formatter formatter = new Formatter();
-        for (byte b : hash) {
-            formatter.format("%02x", b);
-        }
-        String result = formatter.toString();
-        formatter.close();
-        return result;
-    }
-
     // gets the sha part out of a tree entry
     public String shaPart(String entry) {
         int i = entry.indexOf(":") + 2; // index where the sha1 part starts
@@ -183,7 +157,7 @@ public class Tree {
         for (String str : t) {
             toSha += str + "\n";
         }
-        return convertToSha1(toSha);
+        return Utils.getSHA (toSha);
 
     }
 
