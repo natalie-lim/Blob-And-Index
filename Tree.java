@@ -11,6 +11,8 @@ import java.util.Formatter;
 
 public class Tree {
 
+    private File currentTree;
+
     public static void main(String[] args) throws Exception {
         Commit commit = new Commit("hello", "summary");
     }
@@ -31,12 +33,13 @@ public class Tree {
         if (directoryListing != null) {
             for (File child : directoryListing) {
                 if (child.isFile()) {
-                    Blob blob = new Blob(child.getName());
+                    Blob blob = new Blob(child.getAbsolutePath());
                     String shaOfFile = blob.getShaString();
                     add("blob: " + shaOfFile + ": " + child.getName());
                 } else {
                     Tree childTree = new Tree();
-                    childTree.addDirectory(directoryPath + "/" + childTree.getSHA1());
+                    childTree.addDirectory(child.getAbsolutePath());
+                    add("tree: " + childTree.getSHA1() + ": " + child.getName());
                 }
             }
         }
@@ -102,8 +105,11 @@ public class Tree {
         {
             t.add(entry);
         }
-
-        File treeFile = new File("TreeIndex"); // actualFile = file you write to
+        if (currentTree != null && currentTree.exists()) {
+            currentTree.delete();
+        }
+        File treeFile = new File("objects/" + getSHA1()); // actualFile = file you write to
+        currentTree = treeFile;
         treeFile.createNewFile();
 
         // print entry into the tree
@@ -130,7 +136,9 @@ public class Tree {
             }
 
         }
-        PrintWriter pw = new PrintWriter("TreeIndex");
+        currentTree.delete();
+        currentTree = new File("objects/" + getSHA1());
+        PrintWriter pw = new PrintWriter("objects/" + getSHA1());
         for (int i = 0; i < t.size(); i++) {
             pw.println(t.get(i));
         }
