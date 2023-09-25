@@ -12,11 +12,6 @@ import java.util.Formatter;
 public class Tree {
 
     private File currentTree;
-
-    public static void main(String[] args) throws Exception {
-        Commit commit = new Commit("hello", "summary");
-    }
-
     ArrayList<String> t; // list of all the entries of the tree
 
     public Tree() {
@@ -158,7 +153,13 @@ public class Tree {
             toSha += str + "\n";
         }
         return Utils.getSHA (toSha);
-
+    }
+    public String getContents() {
+        String get = "";
+        for (String str : t) {
+            get += (str + "\n");
+        }
+        return get;
     }
 
 }

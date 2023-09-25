@@ -25,7 +25,6 @@ public class Blob {
         translateToSha1();
         writeFile();
     }
-
     public String getOgName ()
     {
         return ogName;
@@ -63,7 +62,6 @@ public class Blob {
         //    (Paths.get("/Users/zhang/Desktop/HonorsTopics/Blob-And-Index-NatalieSophia/objects/" + fileName)));
 
     }  
-    
     public String getFileContents ()
     {
         return fileContents;
