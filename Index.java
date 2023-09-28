@@ -7,12 +7,20 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 public class Index {
-    private static HashMap<String, Blob> blobs;
+    public static void main (String [] args) throws Exception {
+        Index index = new Index();
+        index.init();
+        Index.addTree("test1");
+        Index.addBlob("test1/examplefile1.txt");
+    }
+
+    //first string is the fileName, second is either tree/blob: shaContents
+    private static HashMap<String, String> entries;
     public Index () {
     }
     //initializes a project by creating an index file and a n obj folder
     public void init() throws IOException {
-        blobs = new HashMap<String, Blob>();
+        entries = new HashMap<String, String>();
         //creating the objects
         File theDir = new File("objects");
         if (!theDir.exists()){
@@ -25,30 +33,34 @@ public class Index {
     
     public static void addBlob(String fileName) throws NoSuchAlgorithmException, IOException {
         Blob newBlob = new Blob (fileName);
-        blobs.put(fileName, newBlob);
+        String sha = newBlob.getShaString();
+        entries.put(fileName, "blob: " + sha);
+        writeHashMap();
+    }
+
+    public static void addTree (String dirName) throws Exception {
+        Tree newTree = new Tree();
+        File dir = new File(dirName);
+        dir.mkdir();
+        newTree.addDirectory(dir.getAbsolutePath());
+        String sha = newTree.getShaString();
+        entries.put(dirName, "tree: " + sha);
         writeHashMap();
     }
     
     public void removeBlob (String fileName) throws IOException, NoSuchAlgorithmException {
         //String SHAstring = blobs.get(fileName).getShaString();
-        blobs.remove(fileName);
+        entries.remove(fileName);
         writeHashMap();
     }
     
-    public void printMap () {
-        for (Entry<String, Blob> mapElement: blobs.entrySet()) {
-            String key = mapElement.getKey();
-            String SHA1 = mapElement.getValue().getShaString();
-            System.out.println (key + ": " + SHA1);
-        }
-    }
     
     private static void writeHashMap () throws FileNotFoundException, NoSuchAlgorithmException {
         PrintWriter pw = new PrintWriter ("index");
-        for (Entry<String, Blob> mapElement: blobs.entrySet()) {
-            String key = mapElement.getKey();
-            String SHA1 = mapElement.getValue().getShaString();
-            pw.println (key + ": " + SHA1);
+        for (Entry<String, String> mapElement: entries.entrySet()) {
+            String fileName = mapElement.getKey();
+            String typeAndSha = mapElement.getValue();
+            pw.println (typeAndSha + ": " + fileName);
         }
         pw.close();
     }

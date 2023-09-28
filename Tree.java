@@ -34,11 +34,11 @@ public class Tree {
                 } else {
                     Tree childTree = new Tree();
                     childTree.addDirectory(child.getAbsolutePath());
-                    add("tree: " + childTree.getSHA1() + ": " + child.getName());
+                    add("tree: " + childTree.getShaString() + ": " + child.getName());
                 }
             }
         }
-        return getSHA1();
+        return getShaString();
     }
 
     // gets the sha part out of a tree entry
@@ -77,7 +77,7 @@ public class Tree {
         if (currentTree != null && currentTree.exists()) {
             currentTree.delete();
         }
-        File treeFile = new File("objects/" + getSHA1()); // actualFile = file you write to
+        File treeFile = new File("objects/" + getShaString()); // actualFile = file you write to
         currentTree = treeFile;
         treeFile.createNewFile();
 
@@ -147,7 +147,7 @@ public class Tree {
         pw.close();
     }
 
-    public String getSHA1() {
+    public String getShaString() {
         String toSha = "";
         for (String str : t) {
             toSha += str + "\n";
