@@ -3,7 +3,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,12 +19,15 @@ public class BlobTest {
     @Test
     void testGetFileContents() throws IOException, NoSuchAlgorithmException {
         File f = new File ("example.txt");
+        PrintWriter pw = new PrintWriter("example.txt");
+        pw.println("random stuff so that this isnt empty");
         f.createNewFile();
+        pw.close();
         Blob bob = new Blob ("example.txt");
-        String s = bob.getFileContents();
-        String otherFileContents = TesterHelper.readAFileToAString(TesterHelper.getSha(bob.getOgName()));
+        String newFileContents = bob.getFileContents();
+        String originalFileContents = TesterHelper.readAFileToAString("example.txt");
 
-        assertEquals("Does not work....", s, otherFileContents);
+        assertEquals("Does not work....", newFileContents, originalFileContents);
         //if both file contents do not match (before and after), returns "does not work....."
     }
 

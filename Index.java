@@ -30,7 +30,7 @@ public class Index {
         File file = new File("index");
         file.createNewFile();
     }
-    
+
     public static void addBlob(String fileName) throws NoSuchAlgorithmException, IOException {
         Blob newBlob = new Blob (fileName);
         String sha = newBlob.getShaString();

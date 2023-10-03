@@ -15,7 +15,7 @@ public class TesterHelper {
     public static String readAFileToAString (String str) throws IOException
     {
         StringBuilder sb = new StringBuilder ("");
-        BufferedReader reader = new BufferedReader (new FileReader ("str"));
+        BufferedReader reader = new BufferedReader (new FileReader (str));
         
         while (reader.ready())
         {

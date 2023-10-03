@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -69,6 +71,21 @@ public class Tree {
         return "";
     }
 
+    public void copyIdx(String shaNewTree) throws IOException {
+        File treeFile = new File("objects/" + getShaString()); // actualFile = file you write to
+        currentTree = treeFile;
+        treeFile.createNewFile();
+        PrintWriter pw = new PrintWriter(new FileWriter(treeFile));
+        BufferedReader br = new BufferedReader(new FileReader("index"));
+        pw.println("tree: " + shaNewTree);
+        while (br.ready()) {
+            String line = br.readLine();
+            pw.println(line);
+        }
+        br.close();
+        pw.close();
+    }
+
     public void add(String entry) throws IOException {
         if (!t.contains(entry)) // no duplicates!
         {
@@ -106,8 +123,8 @@ public class Tree {
 
         }
         currentTree.delete();
-        currentTree = new File("objects/" + getSHA1());
-        PrintWriter pw = new PrintWriter("objects/" + getSHA1());
+        currentTree = new File("objects/" + getShaString());
+        PrintWriter pw = new PrintWriter("objects/" + getShaString());
         for (int i = 0; i < t.size(); i++) {
             pw.println(t.get(i));
         }

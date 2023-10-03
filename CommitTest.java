@@ -14,7 +14,8 @@ public class CommitTest {
         String treeSha = "a67a4e6190d11dea06fbd38affc52dcc33cc4564";
         String date = Utils.getDate();
         String content = treeSha + "\n" + Sha1PArent + "\n\n" + author + "\n" + date + "\n" + summary;
-        File commitFile = new File("./objects/" + Utils.getSHA(content));
+        File commitFile = new File("objects/" + Utils.getSHA(content));
+        Commit commit = new Commit(Sha1PArent, author, summary);
         assertTrue("Commit File was not created", commitFile.exists());
         assertEquals("Commit file does not have the correct contents", content, Utils.getFileContents(commitFile));
     }

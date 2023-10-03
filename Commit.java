@@ -1,6 +1,11 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilterReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -9,6 +14,8 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Formatter;
+
+import javax.print.event.PrintEvent;
 
 public class Commit {
     private String SHA1Parent;
@@ -27,24 +34,58 @@ public class Commit {
     }
 
     public Commit(String SHA1Parent, String author, String summary) throws Exception {
-        SHA1tree = createTree();
-
         this.SHA1Parent = SHA1Parent;
         this.author = author;
         this.summary = summary;
         this.date = getDate();
+        this.tree = new Tree();
 
+        this.SHA1tree = tree.getShaString();
         SHA1NextCommit = "";
         fileContents = getContents();
         SHA1FileContents = getSHA(fileContents);
 
-        File commitFile = new File("./objects/" + SHA1FileContents);
+                File idx = new File("index");
+        tree.copyIdx(SHA1tree);
+        idx.delete();
+
+        File commitFile = new File("objects/" + SHA1FileContents);
         writeToFile(commitFile, fileContents);
 
     }
 
-    public Commit(String author, String summary) throws Exception {
+    public Commit (String author, String summary) throws Exception {
         this("", author, summary);
+    }
+
+    public void writePreviousNext() throws IOException {
+        File previousTree = new File("objects/" + SHA1Parent);
+        File temp = new File("temp");
+        PrintWriter pw = new PrintWriter (temp);
+        BufferedReader br = new BufferedReader(new FileReader(previousTree));
+        if (br.ready()) {
+            String line = br.readLine();
+            pw.println(line);
+            line = br.readLine();
+            pw.println(line);
+            pw.println(SHA1FileContents);
+        }
+        while (br.ready()) {
+            pw.print(br.readLine());
+        }
+        pw.close();
+        br.close();
+    }
+
+
+    public String getTreeHash() throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(SHA1FileContents));
+        String hash = "";
+        if (br.ready()) {
+            hash = br.readLine();
+        }
+        br.close();
+        return hash;
     }
 
     public String getDate() {
@@ -92,7 +133,7 @@ public class Commit {
     public String createTree() throws Exception {
         this.tree = new Tree();
         tree.putInObjects();
-        return tree.getSHA1();
+        return tree.getShaString();
     }
 
     public void writeToFile(File file, String contents) throws Exception {
