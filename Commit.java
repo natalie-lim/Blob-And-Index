@@ -27,6 +27,7 @@ public class Commit {
     private String SHA1NextCommit;
     private String fileContents;
     private String SHA1FileContents;
+    private Commit parentCommit;
     File commitFile;
 
     public static void main(String[] args) throws Exception {
@@ -35,6 +36,7 @@ public class Commit {
 
     public Commit(String SHA1Parent, String author, String summary) throws Exception {
         this.SHA1Parent = SHA1Parent;
+        
         this.author = author;
         this.summary = summary;
         this.date = getDate();
@@ -44,10 +46,15 @@ public class Commit {
         SHA1NextCommit = "";
         fileContents = getContents();
         SHA1FileContents = getSHA(fileContents);
-
-                File idx = new File("index");
         tree.copyIdx(SHA1tree);
-        idx.delete();
+        PrintWriter writer = new PrintWriter("index");
+        writer.print("");
+        writer.close();
+
+        if (!SHA1Parent.equals("")) {
+            tree.add("tree: " + getTreeHash(SHA1Parent));
+            writePreviousNext();
+        }
 
         File commitFile = new File("objects/" + SHA1FileContents);
         writeToFile(commitFile, fileContents);
@@ -58,28 +65,30 @@ public class Commit {
         this("", author, summary);
     }
 
+    public Tree getTree() {
+        return tree;
+    }
+
     public void writePreviousNext() throws IOException {
         File previousTree = new File("objects/" + SHA1Parent);
         File temp = new File("temp");
-        PrintWriter pw = new PrintWriter (temp);
+        PrintWriter pw = new PrintWriter(temp);
         BufferedReader br = new BufferedReader(new FileReader(previousTree));
-        if (br.ready()) {
-            String line = br.readLine();
-            pw.println(line);
-            line = br.readLine();
-            pw.println(line);
-            pw.println(SHA1FileContents);
-        }
-        while (br.ready()) {
-            pw.print(br.readLine());
-        }
+        pw.print(br.readLine());
+        pw.print("\n" + br.readLine());
+        pw.print("\n" + SHA1FileContents);
+        pw.println(br.readLine());
+        pw.println(br.readLine());
+        pw.println(br.readLine());
+        pw.print(br.readLine());
         pw.close();
         br.close();
+        temp.renameTo(previousTree);
     }
 
 
-    public String getTreeHash() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(SHA1FileContents));
+    public static String getTreeHash(String SHACommit) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("objects/" + SHACommit));
         String hash = "";
         if (br.ready()) {
             hash = br.readLine();
@@ -102,6 +111,10 @@ public class Commit {
 
     public String getContents() {
         return (SHA1tree + "\n" + SHA1Parent + "\n" + SHA1NextCommit + "\n" + author + "\n" + date + "\n" + summary);
+    }
+
+    public String getSHA1FileContents () {
+        return SHA1FileContents;
     }
 
     public static String getSHA(String contents) {
