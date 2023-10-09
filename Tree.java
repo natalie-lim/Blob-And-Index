@@ -73,17 +73,15 @@ public class Tree {
 
     public void copyIdx(String shaNewTree) throws IOException {
         File treeFile = new File("objects/" + getShaString()); // actualFile = file you write to
+        this.t =new ArrayList<String>();
         currentTree = treeFile;
         treeFile.createNewFile();
-        PrintWriter pw = new PrintWriter(new FileWriter(treeFile));
         BufferedReader br = new BufferedReader(new FileReader("index"));
-        pw.println("tree: " + shaNewTree);
         while (br.ready()) {
-            String line = br.readLine();
-            pw.println(line);
+            t.add(br.readLine());
         }
         br.close();
-        pw.close();
+        putInObjects();
     }
 
     public void add(String entry) throws IOException {
@@ -96,13 +94,16 @@ public class Tree {
         }
         File treeFile = new File("objects/" + getShaString()); // actualFile = file you write to
         currentTree = treeFile;
-        treeFile.createNewFile();
 
         // print entry into the tree
         PrintWriter pw = new PrintWriter(treeFile);
         // prints out everything in arrayList to the tree index
         for (int i = 0; i < t.size(); i++) {
-            pw.println(t.get(i));
+            if (i != t.size()-1) {
+                pw.println(t.get(i));
+            } else {
+                pw.print(t.get(i));
+            }
         }
         pw.close();
     }
@@ -126,19 +127,28 @@ public class Tree {
         currentTree = new File("objects/" + getShaString());
         PrintWriter pw = new PrintWriter("objects/" + getShaString());
         for (int i = 0; i < t.size(); i++) {
-            pw.println(t.get(i));
+            if (i != t.size()-1) {
+                pw.println(t.get(i));
+            } else {
+                pw.print(t.get(i));
+            }
         }
         pw.close();
 
     }
 
+
     // puts tree into the objects folder by taking the hash and stuff
     public void putInObjects() throws IOException {
         StringBuilder sb = new StringBuilder("");
-        for (int i = 0; i < t.size() - 1; i++) {
-            sb.append("" + t.get(i));
+        for (int i = 0; i < t.size(); i++) {
+            if (i != t.size()-1) {
+                sb.append("" + t.get(i)+ "\n");
+            } else {
+                sb.append("" + t.get(i));
+            }
         }
-
+        File previousTree = new File("objects/" + getShaString());
         String sha1 = "";
 
         // my algorithm for getting the sha1, because yours didn't really work for this
@@ -158,23 +168,29 @@ public class Tree {
         }
 
         PrintWriter pw = new PrintWriter(file);
-        for (int i = 0; i < t.size(); i++) {
-            pw.println(t.get(i));
-        }
+        pw.print(sb);
         pw.close();
     }
 
     public String getShaString() {
         String toSha = "";
-        for (String str : t) {
-            toSha += str + "\n";
+        for (int i = 0; i < t.size(); i++) {
+            if (i != t.size()-1) {
+                toSha += (t.get(i) + "\n");
+            } else {
+                toSha += t.get(i);
+            }
         }
         return Utils.getSHA (toSha);
     }
     public String getContents() {
         String get = "";
-        for (String str : t) {
-            get += (str + "\n");
+        for (int i = 0; i < t.size(); i++) {
+            if (i != t.size()-1) {
+                get += (t.get(i) + "\n");
+            } else {
+                get += t.get(i);
+            }
         }
         return get;
     }

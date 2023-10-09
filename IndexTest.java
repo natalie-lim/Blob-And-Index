@@ -40,8 +40,9 @@ public class IndexTest {
         
         TesterHelper.deleteFile("junit_example.txt");
         TesterHelper.deleteFile("index");
-        TesterHelper.deleteDirectory("objects");
-         
+        File obj = new File ("objects");
+        obj.mkdir();
+        obj.delete();
     }
     
     //adds a blob to the index
@@ -64,9 +65,8 @@ public class IndexTest {
         //if file does not exist, then "Blob file to add not found" is output
 
         // Read file contents
-        String indexFileContents = TesterHelper.readAFileToAString(bob.getShaString());
-        assertEquals("File contents of Blob don't match file contents pre-blob creation", indexFileContents,
-                bob.getFileContents());
+        String indexFileContents = TesterHelper.readAFileToAString("objects/" + bob.getShaString());
+        assertEquals(indexFileContents, bob.getFileContents());
             //if the file contents of both tests don't match up, then the test will return "file contents of blob..."
     }
 
