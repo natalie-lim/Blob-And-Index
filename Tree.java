@@ -15,9 +15,12 @@ public class Tree {
 
     private File currentTree;
     ArrayList<String> t; // list of all the entries of the tree
+    private String prevTreeHash;
+    private ArrayList<String> deletedAndEdited = new ArrayList<String> ();
 
     public Tree() {
         t = new ArrayList<String>();
+        this.prevTreeHash = "";
     }
 
     public String addDirectory(String directoryPath) throws Exception {
@@ -71,17 +74,53 @@ public class Tree {
         return "";
     }
 
+    public void addPrev(String prevTreeHash) throws IOException {
+        this.prevTreeHash = prevTreeHash;
+        add("tree: " + prevTreeHash);
+    }
+
     public void copyIdx(String shaNewTree) throws IOException {
         File treeFile = new File("objects/" + getShaString()); // actualFile = file you write to
         this.t =new ArrayList<String>();
         currentTree = treeFile;
         treeFile.createNewFile();
         BufferedReader br = new BufferedReader(new FileReader("index"));
+        String currentLine = "";
         while (br.ready()) {
-            t.add(br.readLine());
+            currentLine = br.readLine();
+            if (currentLine.contains("*deleted*") || currentLine.contains("*edited*")) {
+                deletedAndEdited.add(currentLine.substring(currentLine.indexOf(" ") + 1));
+            }
+            } else {
+                t.add(br.readLine());
+            }
         }
         br.close();
         putInObjects();
+    }
+
+    public void goBackAndDelete() throws IOException {
+        for (String entry : deletedAndEdited) {
+            if (!t.contains(entry)) {
+                String prevTreeContents = Utils.getFileContents(new File ("objects/" + this.prevTreeHash));
+                removeEntryHelper(prevTreeContents, entry);
+            } else {
+                t.remove(entry);
+                currentTree.delete();
+                putInObjects();
+            }
+        }
+
+    }
+
+    private void removeEntryHelper (String prevTreeContents, String entry) throws IOException {
+        if (prevTreeContents.contains(entry)) {
+            prevTreeContents = prevTreeContents.substring(0, prevTreeContents.indexOf(entry)) + prevTreeContents.substring(prevTreeContents.indexOf(entry) + 40);
+        } else {
+            prevTreeHash = prevTreeContents.substring(prevTreeContents.length()-40);
+            String prevTreeContentsNew = Utils.getFileContents(new File("objects/" + prevTreeHash));
+            removeEntryHelper (prevTreeContentsNew, entry);
+        }
     }
 
     public void add(String entry) throws IOException {

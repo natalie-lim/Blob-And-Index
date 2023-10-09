@@ -54,13 +54,24 @@ public class Index {
         writeHashMap();
     }
     
+    public void deleteFile (String fileToDelete) {
+        entries.put("*deleted* "+ fileToDelete, "");
+    }
+
+    public void editFiles (String fileToEdit) {
+        entries.put("*edited* "+ fileToEdit, "");
+    }
     
     private static void writeHashMap () throws FileNotFoundException, NoSuchAlgorithmException {
         PrintWriter pw = new PrintWriter ("index");
         for (Entry<String, String> mapElement: entries.entrySet()) {
             String fileName = mapElement.getKey();
             String typeAndSha = mapElement.getValue();
-            pw.println (typeAndSha + ": " + fileName);
+            if (!typeAndSha.equals("")) {
+                pw.println (typeAndSha + ": " + fileName);
+            } else {
+                pw.println(fileName);
+            }
         }
         pw.close();
     }

@@ -43,7 +43,8 @@ public class Commit {
         writer.close();
 
         if (!SHA1Parent.equals("")) {
-            tree.add("tree: " + getTreeHash(SHA1Parent));
+            tree.addPrev( getTreeHash(SHA1Parent));
+            tree.goBackAndDelete();
             this.SHA1Parent = SHA1Parent;
         } else {
             this.SHA1Parent = "";
