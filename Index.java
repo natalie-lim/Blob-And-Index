@@ -7,12 +7,6 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 public class Index {
-    public static void main (String [] args) throws Exception {
-        Index index = new Index();
-        index.init();
-        Index.addTree("test1");
-        Index.addBlob("test1/examplefile1.txt");
-    }
 
     //first string is the fileName, second is either tree/blob: shaContents
     private static HashMap<String, String> entries;
@@ -48,18 +42,20 @@ public class Index {
         writeHashMap();
     }
     
-    public void removeBlob (String fileName) throws IOException, NoSuchAlgorithmException {
+    public static void removeBlob (String fileName) throws IOException, NoSuchAlgorithmException {
         //String SHAstring = blobs.get(fileName).getShaString();
         entries.remove(fileName);
         writeHashMap();
     }
     
-    public void deleteFile (String fileToDelete) {
+    public static void deleteFile (String fileToDelete) throws FileNotFoundException, NoSuchAlgorithmException {
         entries.put("*deleted* "+ fileToDelete, "");
+        writeHashMap();
     }
 
-    public void editFiles (String fileToEdit) {
+    public static void editFiles (String fileToEdit) throws FileNotFoundException, NoSuchAlgorithmException {
         entries.put("*edited* "+ fileToEdit, "");
+        writeHashMap();
     }
     
     private static void writeHashMap () throws FileNotFoundException, NoSuchAlgorithmException {

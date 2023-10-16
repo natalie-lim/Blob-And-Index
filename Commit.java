@@ -36,24 +36,26 @@ public class Commit {
         this.SHA1NextCommit = "";
         this.date = getDate();
         this.tree = new Tree();
-
-        tree.copyIdx(SHA1tree);
-        PrintWriter writer = new PrintWriter("index");
-        writer.print("");
-        writer.close();
+        String previousTreeHash = "";
 
         if (!SHA1Parent.equals("")) {
-            tree.addPrev( getTreeHash(SHA1Parent));
-            tree.goBackAndDelete();
             this.SHA1Parent = SHA1Parent;
+            BufferedReader br = new BufferedReader(new FileReader("objects/" + SHA1Parent));
+            previousTreeHash = br.readLine();
+            br.close();
         } else {
             this.SHA1Parent = "";
         }
+
+        tree.copyIdx(previousTreeHash);
+        PrintWriter writer = new PrintWriter("index");
+        writer.print("");
+        writer.close();
         this.SHA1tree = tree.getShaString();
         this.fileContents = getContents();
         this.SHA1FileContents = getSHA(fileContents);
         if (!SHA1Parent.equals("")) {
-            writePreviousNext();
+            addNextCommitToPrevious();
         }
         File commitFile = new File("objects/" + SHA1FileContents);
         writeToFile(commitFile, fileContents);
@@ -84,7 +86,7 @@ public class Commit {
         return (SHA1NextCommit);
     }
 
-    public Commit getCommit (String ShaFile) throws Exception {
+    public static Commit getCommit (String ShaFile) throws Exception {
         BufferedReader br = new BufferedReader(new FileReader (ShaFile));
         br.readLine();
         String previous = br.readLine();
@@ -100,25 +102,32 @@ public class Commit {
         
     }
 
-    public void writePreviousNext() throws Exception {
-        File previousTree = new File("objects/" + SHA1Parent);
+    public void addNextCommitToPrevious() throws Exception {
+        File previousCommit = new File("objects/" + SHA1Parent);
         File temp = new File("temp");
         PrintWriter pw = new PrintWriter(temp);
-        BufferedReader br = new BufferedReader(new FileReader(previousTree));
+        BufferedReader br = new BufferedReader(new FileReader(previousCommit));
         String line = br.readLine();
+        //sha1 of tree
         pw.print(line);
         line = br.readLine();
+        //previous
+        pw.print(line);
         line = br.readLine();
+        //sha next
         pw.println("\n\n" + SHA1FileContents);
         line = br.readLine();
+        //author
         pw.println(line);
         line = br.readLine();
+        //date
         pw.println(line);
         line = br.readLine();
+        //summary
         pw.print(line);
         pw.close();
         br.close();
-        temp.renameTo(previousTree);
+        temp.renameTo(previousCommit);
     }
 
     public void setNext(String next) throws Exception {

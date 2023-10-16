@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,11 +17,20 @@ public class Tree {
     private File currentTree;
     ArrayList<String> t; // list of all the entries of the tree
     private String prevTreeHash;
-    private ArrayList<String> deletedAndEdited = new ArrayList<String> ();
+    private ArrayList<String> deletedAndEdited;;
 
-    public Tree() {
-        t = new ArrayList<String>();
-        this.prevTreeHash = "";
+    public Tree(ArrayList<String> t, String prevTreeHash) {
+        this.t = t;
+        this.prevTreeHash = prevTreeHash;
+        deletedAndEdited = new ArrayList<String>();
+    }
+
+    public Tree () {
+        this(new ArrayList<String>(), "");
+    }
+
+    public void setCurrentTree(File currentTree) {
+        this.currentTree = currentTree;
     }
 
     public String addDirectory(String directoryPath) throws Exception {
@@ -45,6 +55,8 @@ public class Tree {
         }
         return getShaString();
     }
+
+
 
     // gets the sha part out of a tree entry
     public String shaPart(String entry) {
@@ -74,15 +86,10 @@ public class Tree {
         return "";
     }
 
-    public void addPrev(String prevTreeHash) throws IOException {
+    public void copyIdx(String prevTreeHash) throws IOException {
         this.prevTreeHash = prevTreeHash;
-        add("tree: " + prevTreeHash);
-    }
-
-    public void copyIdx(String shaNewTree) throws IOException {
         File treeFile = new File("objects/" + getShaString()); // actualFile = file you write to
         this.t =new ArrayList<String>();
-        currentTree = treeFile;
         treeFile.createNewFile();
         BufferedReader br = new BufferedReader(new FileReader("index"));
         String currentLine = "";
@@ -90,36 +97,62 @@ public class Tree {
             currentLine = br.readLine();
             if (currentLine.contains("*deleted*") || currentLine.contains("*edited*")) {
                 deletedAndEdited.add(currentLine.substring(currentLine.indexOf(" ") + 1));
-            }
-            } else {
-                t.add(br.readLine());
-            }
+            } 
+            t.add(currentLine);
         }
         br.close();
-        putInObjects();
-    }
-
-    public void goBackAndDelete() throws IOException {
-        for (String entry : deletedAndEdited) {
-            if (!t.contains(entry)) {
-                String prevTreeContents = Utils.getFileContents(new File ("objects/" + this.prevTreeHash));
-                removeEntryHelper(prevTreeContents, entry);
-            } else {
-                t.remove(entry);
-                currentTree.delete();
-                putInObjects();
-            }
+        if (!prevTreeHash.equals("")) {
+            t.add("tree: " + prevTreeHash);
         }
-
+        putInObjects();
+        treeFile.delete();
+        if (deletedAndEdited.size() > 0) {
+            goBackAndDeleteFile(deletedAndEdited, getShaString());
+        }
     }
 
-    private void removeEntryHelper (String prevTreeContents, String entry) throws IOException {
-        if (prevTreeContents.contains(entry)) {
-            prevTreeContents = prevTreeContents.substring(0, prevTreeContents.indexOf(entry)) + prevTreeContents.substring(prevTreeContents.indexOf(entry) + 40);
-        } else {
-            prevTreeHash = prevTreeContents.substring(prevTreeContents.length()-40);
-            String prevTreeContentsNew = Utils.getFileContents(new File("objects/" + prevTreeHash));
-            removeEntryHelper (prevTreeContentsNew, entry);
+    public static String getPrevTreeHash(String currentHash) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("objects/" + currentHash));
+        String lastLine = "";
+        while (br.ready()) {
+            lastLine = br.readLine();
+        }
+        br.close();
+        lastLine = lastLine.substring(lastLine.indexOf(":") + 2);
+        return lastLine;
+    }
+
+    public void goBackAndDeleteFile(ArrayList<String> deletedAndEdited, String currrentFileName) throws IOException {
+        File temp = new File("temp");
+        for (int i = 0; i < deletedAndEdited.size(); i ++) {
+            BufferedReader br = new BufferedReader(new FileReader ("objects/" + currrentFileName));
+            PrintWriter pw = new PrintWriter(temp);
+            String line = "";
+            String toDeleteOrEdit = deletedAndEdited.get(i);
+            boolean isFirstLine = true;
+            while (br.ready()) {
+                line = br.readLine();
+                if (!line.contains(toDeleteOrEdit) || line.contains("*")) {
+                    if (isFirstLine) {
+                        pw.print(line);
+                        isFirstLine = false;
+                    } else {
+                        pw.print("\n" + line);
+                    }
+                } else {
+                    deletedAndEdited.remove(i);
+                }
+            }
+            br.close();
+            pw.close();
+        }
+        String newFileName = Utils.getSHA(Utils.getFileContents(temp));
+        File oldFile = new File("objects/" + currrentFileName);
+        oldFile.delete();
+        temp.renameTo(new File ("objects/" + newFileName));
+        if (deletedAndEdited.size() > 0) {
+            String previousTree = getPrevTreeHash(getShaString());
+            goBackAndDeleteFile(deletedAndEdited, previousTree);
         }
     }
 
@@ -135,16 +168,7 @@ public class Tree {
         currentTree = treeFile;
 
         // print entry into the tree
-        PrintWriter pw = new PrintWriter(treeFile);
-        // prints out everything in arrayList to the tree index
-        for (int i = 0; i < t.size(); i++) {
-            if (i != t.size()-1) {
-                pw.println(t.get(i));
-            } else {
-                pw.print(t.get(i));
-            }
-        }
-        pw.close();
+        putInObjects();
     }
 
     public void remove(String str) throws IOException {
@@ -173,7 +197,6 @@ public class Tree {
             }
         }
         pw.close();
-
     }
 
 
@@ -187,7 +210,6 @@ public class Tree {
                 sb.append("" + t.get(i));
             }
         }
-        File previousTree = new File("objects/" + getShaString());
         String sha1 = "";
 
         // my algorithm for getting the sha1, because yours didn't really work for this
@@ -207,6 +229,7 @@ public class Tree {
         }
 
         PrintWriter pw = new PrintWriter(file);
+        this.currentTree = file;
         pw.print(sb);
         pw.close();
     }
