@@ -91,24 +91,26 @@ public class Tree {
         File treeFile = new File("objects/" + getShaString()); // actualFile = file you write to
         this.t =new ArrayList<String>();
         treeFile.createNewFile();
+        String nameToChange = "";
         BufferedReader br = new BufferedReader(new FileReader("index"));
         String currentLine = "";
+        boolean containsFile = false;
         while (br.ready()) {
             currentLine = br.readLine();
             if (currentLine.contains("*deleted*") || currentLine.contains("*edited*")) {
-                deletedAndEdited.add(currentLine.substring(currentLine.indexOf(" ") + 1));
-            } 
-            t.add(currentLine);
+                nameToChange = currentLine.substring(currentLine.indexOf("d*") + 2);
+                goBackAndDeleteFile(nameToChange, prevTreeHash);
+                containsFile = true;
+            } else {
+                t.add(currentLine);
+            }
         }
         br.close();
-        if (!prevTreeHash.equals("")) {
+        if (!prevTreeHash.equals("") && !containsFile) {
             t.add("tree: " + prevTreeHash);
         }
         putInObjects();
         treeFile.delete();
-        if (deletedAndEdited.size() > 0) {
-            goBackAndDeleteFile(deletedAndEdited, getShaString());
-        }
     }
 
     public static String getPrevTreeHash(String currentHash) throws IOException {
@@ -118,41 +120,36 @@ public class Tree {
             lastLine = br.readLine();
         }
         br.close();
+        if (lastLine.contains(":")) {
+            String check = lastLine.substring(lastLine.indexOf(":") + 2);
+            if (check.contains(":")) {
+                return "";
+            }
+        }
         lastLine = lastLine.substring(lastLine.indexOf(":") + 2);
         return lastLine;
     }
 
-    public void goBackAndDeleteFile(ArrayList<String> deletedAndEdited, String currrentFileName) throws IOException {
-        File temp = new File("temp");
-        for (int i = 0; i < deletedAndEdited.size(); i ++) {
-            BufferedReader br = new BufferedReader(new FileReader ("objects/" + currrentFileName));
-            PrintWriter pw = new PrintWriter(temp);
-            String line = "";
-            String toDeleteOrEdit = deletedAndEdited.get(i);
-            boolean isFirstLine = true;
-            while (br.ready()) {
-                line = br.readLine();
-                if (!line.contains(toDeleteOrEdit) || line.contains("*")) {
-                    if (isFirstLine) {
-                        pw.print(line);
-                        isFirstLine = false;
-                    } else {
-                        pw.print("\n" + line);
-                    }
-                } else {
-                    deletedAndEdited.remove(i);
-                }
+    public void goBackAndDeleteFile(String nameDeleteOrEdit, String currrentFileName) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader ("objects/" + currrentFileName));
+        String line = "";
+        boolean containsFile = false;
+        while (br.ready()) {
+            line = br.readLine();
+            if (line.contains(nameDeleteOrEdit) && !line.contains("*")) {
+                containsFile = true;
+            } else {
+                add(line);
             }
-            br.close();
-            pw.close();
         }
-        String newFileName = Utils.getSHA(Utils.getFileContents(temp));
-        File oldFile = new File("objects/" + currrentFileName);
-        oldFile.delete();
-        temp.renameTo(new File ("objects/" + newFileName));
-        if (deletedAndEdited.size() > 0) {
-            String previousTree = getPrevTreeHash(getShaString());
-            goBackAndDeleteFile(deletedAndEdited, previousTree);
+        br.close();
+        if (containsFile == true) {
+            String previousTree = getPrevTreeHash(currrentFileName);
+            if (!previousTree.equals("")) {
+                add("tree: " + previousTree);
+            }
+        } else {
+            goBackAndDeleteFile(nameDeleteOrEdit, getPrevTreeHash(currrentFileName));
         }
     }
 

@@ -12,6 +12,6 @@ public class AllPurposeTester {
         Index.addBlob("example1");
         Index.editFiles("example.txt");
         Commit commit2 = new Commit(commit.getSHA1FileContents(), "natalie lim", "commit 2");
-
+        
     }
 }
