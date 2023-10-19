@@ -109,13 +109,13 @@ public class Commit {
         BufferedReader br = new BufferedReader(new FileReader(previousCommit));
         String line = br.readLine();
         //sha1 of tree
-        pw.print(line);
+        pw.println(line);
         line = br.readLine();
         //previous
-        pw.print(line);
+        pw.println(line);
         line = br.readLine();
         //sha next
-        pw.println("\n\n" + SHA1FileContents);
+        pw.println(SHA1FileContents);
         line = br.readLine();
         //author
         pw.println(line);
