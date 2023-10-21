@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 
 import org.junit.After;
 import org.junit.jupiter.api.AfterAll;
@@ -175,6 +176,96 @@ public class CommitTestJunit {
         actual = actual.substring(0, actual.length()-1);
         br4.close();
         assertEquals(supposed, actual);
+    }
+
+    @Test
+    void testEditDelete() throws Exception {
+        Index index = new Index();
+        index.init();
+        Index.addBlob("example.txt");
+        Index.addBlob("words.txt");
+        Commit commit = new Commit("Author", "commit 1");
+        index.init();
+        Index.addBlob("example1");
+        Commit commit2 = new Commit(commit.getSHA1FileContents(), "natalie lim", "commit 2");
+        BufferedReader br1 = new BufferedReader(new FileReader("objects/" + commit2.getSHA1FileContents()));
+        String contentsSecond = "";
+        while (br1.ready()) {
+            contentsSecond += br1.readLine();
+            if (br1.ready()) {
+                contentsSecond += "\n";
+            }
+        }
+        br1.close();
+        assertEquals("contents of the second commit match what it's supposed to be", "c960c626749bf366df2212696201ea9d35793f03\n" + //
+                "0d64822f01a8d581dc4b04cbd56531d73283104e\n" + //
+                "\n" + //
+                "natalie lim\n" + //
+                "OCTOBER 20, 2023\n" + //
+                "commit 2", contentsSecond);
+        
+        //testing 3 commit
+        index.init();
+        Index.addTree("test1");
+        Index.addBlob("hello");
+        Index.deleteFile("example1");
+        Commit commit3 = new Commit (commit2.getSHA1FileContents(), "bob", "commit 3");
+        BufferedReader br2 = new BufferedReader(new FileReader("objects/" + commit3.getSHA1FileContents()));
+        String contentThird = "";
+        while (br2.ready()) {
+            contentThird += br2.readLine();
+            if (br2.ready()) {
+                contentThird += "\n";
+            }
+        }
+        br2.close();
+        assertEquals("contents of the third commit match what it's supposed to be", "02637f73d4f3957aeeff75f9b5218e5e4e478727\n" + //
+                "45d31b1c790d0acfe2e2976e9a94b9d835c02d38\n" + //
+                "\n" + //
+                "bob\n" + //
+                "OCTOBER 20, 2023\n" + //
+                "commit 3", contentThird);
+        
+        //testing 4 commit
+        index.init();
+        Index.addTree("commit1");
+        Index.addTree("commit2");
+        Commit commit4 = new Commit(commit3.getSHA1FileContents(), "bella", "commit 4");
+        BufferedReader br3 = new BufferedReader(new FileReader("objects/" + commit4.getSHA1FileContents()));
+        String contentFourth = "";
+        while (br3.ready()) {
+            contentFourth += br3.readLine();
+            if (br3.ready()) {
+                contentFourth += "\n";
+            }
+        }
+        br3.close();
+        assertEquals("7da306e8f8cbd740c92d4e60d61865dec94a0cf7\n" + //
+                "1d9cbba0c3fae5e95b36d2c584a227586003969c\n" + //
+                "\n" + //
+                "bella\n" + //
+                "OCTOBER 20, 2023\n" + //
+                "commit 4", contentFourth);
+
+    }
+    @Test
+    void fifthCommit() throws Exception  {
+         //testing 5 commit
+        Index index = new Index();
+        index.init();
+        Index.deleteFile("example.txt");
+        Index.editFiles("test1");
+        Index.addTree("commit4");
+        Commit commit5 = new Commit("878353f8479a0b99948a745ebc10cec2a306bd42", "bartholemew", "commit 5");
+        BufferedReader br4 = new BufferedReader(new FileReader("objects/" + commit5.getSHA1FileContents()));
+        String contentFifth = "";
+        while (br4.ready()) {
+            contentFifth += br4.readLine();
+            if (br4.ready()) {
+                contentFifth += "\n";
+            }
+        }
+        br4.close();
     }
 
 }
