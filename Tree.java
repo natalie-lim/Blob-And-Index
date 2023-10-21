@@ -98,23 +98,25 @@ public class Tree {
         String currentLine = "";
         boolean containsFile = false;
         boolean firstEditOrDelete = true;
+        boolean noneDeletedOrEdited = true;
         while (br.ready()) {
             currentLine = br.readLine();
             if (currentLine.contains("*deleted*") || currentLine.contains("*edited*")) {
                 nameToChange = currentLine.substring(currentLine.indexOf("d*") + 2);
                 if (firstEditOrDelete) {
-                    goBackAndDeleteFile(nameToChange, prevTreeHash, firstEditOrDelete);
+                    goBackAndDeleteFile(nameToChange, prevTreeHash);
                     firstEditOrDelete = false;
                 } else {
-                    goBackAndDeleteFile(nameToChange, prevTreeHash, firstEditOrDelete);
+                    goBackAndDeleteRepeat(nameToChange);
                 }
                 containsFile = true;
+                noneDeletedOrEdited = false;
             } else {
                 t.add(currentLine);
             }
         }
         br.close();
-        if (!prevTreeHash.equals("") && containsFile) {
+        if (!prevTreeHash.equals("") && (noneDeletedOrEdited == true)) {
             t.add("tree: " + prevTreeHash);
         }
         putInObjects();
@@ -137,49 +139,58 @@ public class Tree {
         return "";
     }
 
-    public void goBackAndDeleteFile(String nameDeleteOrEdit, String currrentFileName, boolean isFirst) throws IOException {
+    public static boolean isPrevTree (String entry) {
+        if (entry.contains(":")) {
+                int idxOfFirstColon = entry.indexOf(":");
+                if (!entry.substring(idxOfFirstColon + 2).contains(":")) {
+                    return true;
+                }
+            }
+        return false;
+    }
+
+    public void goBackAndDeleteFile(String nameDeleteOrEdit, String currrentFileName) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader ("objects/" + currrentFileName));
         String line = "";
         boolean containsFile = false;
-        if (!isFirst) {
-            ArrayList <String> treeHashes= new ArrayList<String>();
-            boolean contains = false;
-            while (br.ready()) {
-                line = br.readLine();
-                if (!line.substring(line.indexOf(":") + 2).contains(":")) {
-                    treeHashes.add(line.substring(line.indexOf(":") + 2));
-                }
-                else if (!line.contains(nameDeleteOrEdit)) {
-                    add(line);
-                } else if (line.contains(nameDeleteOrEdit)) {
-                    contains = true;
-                }
-            }
-            if (!contains) {
-                for (String hash: treeHashes) {
-                    goBackAndDeleteFile(nameDeleteOrEdit, hash, isFirst);
-                }
+        String prevTree = "";
+        while (br.ready()) {
+            line = br.readLine();
+            if (line.contains(nameDeleteOrEdit) && !line.contains("*")) {
+                containsFile = true;
             } else {
-                for (String hash: treeHashes) {
-                    add("tree: " + hash);
-                }
-            }
-        } else {
-            while (br.ready()) {
-                line = br.readLine();
-                if (line.contains(nameDeleteOrEdit) && !line.contains("*")) {
-                    containsFile = true;
+                if (!isPrevTree(line)) {
+                    add(line);
                 } else {
-                    if (line.substring(line.indexOf(":") + 2).contains(":")) {
-                        add(line);
-                    }
+                    prevTree = line.substring(line.indexOf(": ") + 2);
                 }
             }
-            br.close();
-            add("tree: " + prevTreeHash);
-            if (containsFile == false) {
-                goBackAndDeleteFile(nameDeleteOrEdit, getPrevTreeHash(currrentFileName), true);
+        }
+        br.close();
+        if (containsFile == false) {
+            goBackAndDeleteFile(nameDeleteOrEdit, prevTree);
+        } else {
+            if (!prevTree.equals("")) {
+                add("tree: " + prevTree);
             }
+        }
+    }
+
+    public void goBackAndDeleteRepeat(String nameDeleteOrEdit) throws IOException {
+        boolean gotRemoved = false;
+        String prevTreeSha = "";
+        for (String entry: t) {
+            if (entry.contains(nameDeleteOrEdit)) {
+                t.remove(nameDeleteOrEdit);
+                gotRemoved = true;
+            } if (isPrevTree(entry)) {
+                prevTreeSha = entry;
+            }
+        }
+        if (gotRemoved == false) {
+            t.remove(prevTreeSha);
+            prevTreeSha = prevTreeSha.substring(prevTreeSha.indexOf(": ") + 2);
+            goBackAndDeleteFile(nameDeleteOrEdit, prevTreeSha);
         }
     }
 

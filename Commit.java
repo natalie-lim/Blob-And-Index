@@ -59,7 +59,6 @@ public class Commit {
         }
         File commitFile = new File("objects/" + SHA1FileContents);
         writeToFile(commitFile, fileContents);
-
     }
 
     public Commit (String author, String summary) throws Exception {

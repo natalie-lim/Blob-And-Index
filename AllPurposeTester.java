@@ -20,10 +20,10 @@ public class AllPurposeTester {
         Index.addTree("commit1");
         Index.addTree("commit2");
         Commit commit4 = new Commit(commit3.getSHA1FileContents(), "bella", "commit 4");
-        // index.init();
-        // Index.deleteFile("example.txt");
-        // Index.editFiles("test1");
-        // Index.addTree("commit4");
-        // Commit commit5 = new Commit(commit4.getSHA1FileContents(), "bartholemew", "commit 5");
+        index.init();
+        Index.deleteFile("example.txt");
+        Index.editFiles("test1");
+        Index.addTree("commit4");
+        Commit commit5 = new Commit(commit4.getSHA1FileContents(), "bartholemew", "commit 5");
     }
 }
