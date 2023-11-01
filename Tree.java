@@ -104,7 +104,9 @@ public class Tree {
             if (currentLine.contains("*deleted*") || currentLine.contains("*edited*")) {
                 nameToChange = currentLine.substring(currentLine.indexOf("d*") + 2);
                 if (firstEditOrDelete) {
-                    goBackAndDeleteFile(nameToChange, prevTreeHash);
+                    if (!prevTreeHash.equals("")) {
+                        goBackAndDeleteFile(nameToChange, prevTreeHash);
+                    }
                     firstEditOrDelete = false;
                 } else {
                     goBackAndDeleteRepeat(nameToChange);

@@ -32,6 +32,8 @@ public class CommitTestJunit {
         Index idx = new Index();
         idx.init();
         Index.addTree("test1");
+        
+        Index.deleteFile("test1/examplefile1.txt");
 
         Commit commit1 = new Commit("natalie lim", "please work");
 
